@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bar - Gerenciamento de Comandas</title>
+
+    <!-- Bootstrap e FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #6C63FF;
+            --secondary-color: #4C4B6B;
+            --accent-color: #F1C40F;
+            --background-light: #f4f6f9;
+            --background-dark: #2C3E50;
+            --text-light: #ecf0f1;
+            --text-dark: #2c3e50;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            transition: 0.4s;
+        }
+
+        body.dark-theme {
+            background-color: var(--background-dark);
+            color: var(--text-light);
+        }
+
+        .navbar {
+            background-color: var(--primary-color);
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1100px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .comanda-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .comanda-card:hover {
+            transform: scale(1.05);
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-aberta { background-color: #28a745; }
+        .status-fechada { background-color: #dc3545; }
+
+        .btn-dark-theme {
+            background-color: var(--primary-color);
+            border-radius: 30px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Bar - Comandas</a>
+            <button class="btn btn-dark-theme ms-auto" id="theme-toggle">🌙 Modo Claro</button>
+        </div>
+    </nav>
+
+    <!-- Conteúdo -->
+    <div class="container mt-4">
+        <h1 class="text-center">Gerenciamento de Comandas</h1>
+        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addComandaModal">➕ Abrir Nova Comanda</button>
+
+        <div class="row" id="comandas-container">
+            <!-- Comandas serão geradas aqui dinamicamente -->
+        </div>
+    </div>
+
+    <!-- MODAL: Abrir Nova Comanda -->
+    <div class="modal fade" id="addComandaModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Abrir Nova Comanda</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <button class="btn btn-success w-100" onclick="abrirComanda()">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Adicionar Item -->
+    <div class="modal fade" id="addItemModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adicionar Item à Comanda</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="comandaId">
+                    <label>Nome do Item:</label>
+                    <input type="text" id="itemNome" class="form-control">
+                    <label>Preço:</label>
+                    <input type="number" id="itemPreco" class="form-control">
+                    <button class="btn btn-primary mt-3 w-100" onclick="adicionarItem()">Adicionar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let comandas = JSON.parse(localStorage.getItem("comandas")) || [];
+
+        function salvarComandas() {
+            localStorage.setItem("comandas", JSON.stringify(comandas));
+        }
+
+        function abrirComanda() {
+            const id = comandas.length + 1;
+            comandas.push({ id, status: "Aberta", itens: [], total: 0 });
+            salvarComandas();
+            atualizarComandas();
+            new bootstrap.Modal(document.getElementById("addComandaModal")).hide();
+        }
+
+        function adicionarItem() {
+            const id = document.getElementById("comandaId").value;
+            const nome = document.getElementById("itemNome").value;
+            const preco = parseFloat(document.getElementById("itemPreco").value);
+
+            if (!nome || !preco) {
+                alert("Preencha todos os campos!");
+                return;
+            }
+
+            const comanda = comandas.find(c => c.id == id);
+            comanda.itens.push({ nome, preco });
+            comanda.total += preco;
+            salvarComandas();
+            atualizarComandas();
+            new bootstrap.Modal(document.getElementById("addItemModal")).hide();
+        }
+
+        function fecharComanda(id) {
+            const comanda = comandas.find(c => c.id == id);
+            comanda.status = "Fechada";
+            salvarComandas();
+            atualizarComandas();
+        }
+
+        function abrirModalAdicionarItem(id) {
+            document.getElementById("comandaId").value = id;
+            new bootstrap.Modal(document.getElementById("addItemModal")).show();
+        }
+
+        function atualizarComandas() {
+            const container = document.getElementById("comandas-container");
+            container.innerHTML = "";
+
+            comandas.forEach(comanda => {
+                container.innerHTML += `
+                    <div class="col-md-3">
+                        <div class="comanda-card">
+                            <h5>Comanda #${comanda.id}</h5>
+                            <p><span class="status-indicator status-${comanda.status.toLowerCase()}"></span> ${comanda.status}</p>
+                            ${comanda.status === "Aberta" ? `
+                                <button class="btn btn-primary" onclick="abrirModalAdicionarItem(${comanda.id})">➕ Adicionar Item</button>
+                                <button class="btn btn-danger" onclick="fecharComanda(${comanda.id})">❌ Fechar Comanda</button>
+                            ` : `<p><strong>Total:</strong> R$ ${comanda.total.toFixed(2)}</p>`}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", atualizarComandas);
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Perfil - Clínica Tatuapé</title>
+    <!-- Importando fontes sofisticadas -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Nunito:wght@600&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 e FontAwesome para ícones -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Estilos de perfil */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f6f9;
+            color: #2c3e50;
+        }
+        .navbar {
+            background-color: #6C63FF;
+            padding: 15px;
+        }
+        .navbar-brand {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 600;
+            color: #ecf0f1;
+        }
+        .navbar-nav .nav-link {
+            color: #ecf0f1 !important;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .profile-card {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        .profile-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .profile-header h3 {
+            color: #6C63FF;
+        }
+        .form-control {
+            margin-bottom: 15px;
+        }
+        .btn-save {
+            background-color: #F1C40F;
+            color: #2c3e50;
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-size: 16px;
+            text-transform: uppercase;
+        }
+        .btn-save:hover {
+            background-color: #6C63FF;
+        }
+    </style>
+</head>
+<body>
+    <!-- Cabeçalho com Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Clínica Tatuapé</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/profile">Perfil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Sair</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Formulário de Edição de Perfil -->
+    <div class="container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <h3>Editar Perfil</h3>
+            </div>
+            <form method="POST" action="/edit-profile">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Nome de Usuário</label>
+                    <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Nova Senha (opcional)</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Digite uma nova senha (se desejar)">
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-save">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

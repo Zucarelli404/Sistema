@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fluxo de Caixa</title>
+
+  <!-- Bootstrap 5 e FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-color: #6C63FF;
+      --secondary-color: #4C4B6B;
+      --accent-color: #F1C40F;
+      --background-light: #f4f6f9;
+      --background-dark: #2C3E50;
+      --text-light: #ecf0f1;
+      --text-dark: #2c3e50;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background-dark);
+      color: var(--text-light);
+    }
+
+    .navbar {
+      background-color: var(--primary-color);
+    }
+
+    .container {
+      background: #34495E;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
+      margin-top: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary-color);
+      margin-bottom: 20px;
+    }
+
+    .btn-primary, .btn-success, .btn-danger {
+      border-radius: 8px;
+      padding: 10px 20px;
+    }
+
+    .table {
+      color: var(--text-light);
+    }
+
+    .table-dark {
+      background-color: #1C2833;
+    }
+
+    .modal-content {
+      color: var(--text-dark);
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-radius: 30px;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-color);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Fluxo de Caixa</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1>Fluxo de Caixa</h1>
+    
+    <div class="d-flex justify-content-between mb-3">
+      <a href="/" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Voltar ao Menu</a>
+      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCashflowModal"><i class="fas fa-plus"></i> Adicionar</button>
+    </div>
+    
+    <form method="GET" class="mb-3">
+      <input type="text" class="form-control" name="search" placeholder="Pesquisar..." value="{{ request.args.get('search') }}">
+    </form>
+
+    <h3 class="text-warning">Saldo Total: R$ {{ total_balance|round(2) }}</h3>
+    
+    <div class="table-container">
+      <table class="table table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th>Data</th>
+            <th>Garota</th>
+            <th>Descrição</th>
+            <th>Valor</th>
+            <th>Tipo</th>
+            <th>Tempo</th>
+            <th>Quarto</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cashflow in cashflows %}
+          <tr>
+            <td>{{ cashflow.date.strftime('%d/%m/%Y') }}</td>
+            <td>{{ cashflow.employee.name if cashflow.employee else '---' }}</td>
+            <td>{{ cashflow.description or '---' }}</td>
+            <td class="{{ 'text-success' if cashflow.type == 'Entrada' else 'text-danger' }}"> R$ {{ cashflow.amount|round(2) }} </td>
+            <td>{{ cashflow.type }}</td>
+            <td>{{ cashflow.duration if cashflow.duration else '---' }} min</td>
+            <td>{{ cashflow.room.name if cashflow.room else '---' }}</td>
+            <td>
+              <form action="/cashflow/delete/{{ cashflow.id }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir?')">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal de Adicionar -->
+  <div class="modal fade" id="addCashflowModal" tabindex="-1" aria-labelledby="addCashflowModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addCashflowModalLabel">Adicionar Movimentação</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form action="/cashflow/add" method="POST">
+            <div class="mb-3">
+              <label for="category" class="form-label">Categoria</label>
+              <input type="text" class="form-control" id="category" name="category" required>
+            </div>
+            <div class="mb-3">
+              <label for="description" class="form-label">Descrição</label>
+              <input type="text" class="form-control" id="description" name="description">
+            </div>
+            <div class="mb-3">
+              <label for="amount" class="form-label">Valor</label>
+              <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
+            </div>
+            <div class="mb-3">
+              <label for="type" class="form-label">Tipo</label>
+              <select class="form-control" id="type" name="type" required>
+                <option value="Entrada">Entrada</option>
+                <option value="Saída">Saída</option>
+              </select>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-success">Salvar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica Tatuapé - Gerenciamento de Quartos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 1200px;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        .room-card {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: #fff;
+            text-align: center;
+            padding: 15px;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+            display: inline-block;
+        }
+        .status-livre { background-color: #28a745; }
+        .status-ocupado { background-color: #dc3545; }
+        .status-limpeza { background-color: #ffc107; }
+        .btn-custom {
+            background-color: #2575fc;
+            border: none;
+        }
+        .btn-custom:hover {
+            background-color: #6a11cb;
+        }
+        .modal-content {
+            background-color: #000;
+            color: #fff;
+        }
+        .form-control, .form-select {
+            background-color: #222;
+            color: #fff;
+            border: 1px solid #444;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #6c757d;
+            background-color: #333;
+        }
+        #clock {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="clock"></div>
+    <div class="container">
+        <h1 class="text-center">Gerenciamento de Quartos</h1>
+        <div class="d-flex justify-content-between mb-3">
+            <button class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#addRoomModal">Adicionar Novo Quarto</button>
+            <a href="/" class="btn btn-secondary">Voltar ao Menu</a>
+        </div>
+        <div class="row g-3">
+            {% for room in rooms %}
+            <div class="col-md-3">
+                <div class="room-card" data-room-id="{{ room.id }}">
+                    <h5>{{ room.name }}</h5>
+                    <p><span class="status-indicator status-{{ room.status|lower }}"></span>Status: {{ room.status }}</p>
+                    {% if room.status == 'Livre' %}
+                    <button class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#checkinModal{{ room.id }}">Check-in</button>
+                    {% elif room.status == 'Ocupado' %}
+                    <p><strong>Garota:</strong> {{ room.employee.name }}</p>
+                    <p><strong>Tempo Percorrido:</strong> <span id="time_{{ room.id }}">{{ (room.time_elapsed_minutes or 0) | round(2) }}</span> minutos</p>
+                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#checkoutModal{{ room.id }}">Check-out</button>
+                    {% elif room.status == 'Limpeza' %}
+                    <form method="POST" action="{{ url_for('alterar_status', room_id=room.id) }}">
+                        <button type="submit" class="btn btn-success">Liberar Quarto</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Modal de Check-in -->
+            <div class="modal fade" id="checkinModal{{ room.id }}" tabindex="-1" aria-labelledby="checkinModalLabel{{ room.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <form method="POST" action="{{ url_for('checkin', room_id=room.id) }}">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="checkinModalLabel{{ room.id }}">Check-in no Quarto {{ room.name }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="checkin_time" class="form-label">Hora de Check-in</label>
+                                    <input type="text" class="form-control" name="checkin_time" id="checkin_time" required readonly value="{{ now_minutes }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="employee_id" class="form-label">Funcionário Designado</label>
+                                    <select class="form-select" name="employee_id" id="employee_id" required>
+                                        <option value="">Selecione o Funcionário</option>
+                                        {% for employee in employees %}
+                                            <option value="{{ employee.id }}">{{ employee.name }} - {{ employee.role }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Confirmar Check-in</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Modal de Check-out -->
+            <div class="modal fade" id="checkoutModal{{ room.id }}" tabindex="-1" aria-labelledby="checkoutModalLabel{{ room.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <form method="POST" action="{{ url_for('checkout', room_id=room.id) }}">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="checkoutModalLabel{{ room.id }}">Check-out do Quarto {{ room.name }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                            </div>
+                            <div class="modal-body">
+                                {% if room.time_elapsed_minutes is not none %}
+                                <p><strong>Tempo Percorrido: </strong><span id="time_{{ room.id }}">{{ (room.time_elapsed_minutes or 1) | round(2) }}</span> minutos</p>
+                                {% else %}
+                                    <p><strong>Tempo não disponível</strong></p>
+                                {% endif %}
+                                <div class="mb-3">
+                                    <label for="value" class="form-label">Valor</label>
+                                    <input type="number" class="form-control" name="value" id="value" required min="0">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="payment_method" class="form-label">Método de Pagamento</label>
+                                    <select class="form-select" name="payment_method" id="payment_method" required>
+                                        <option value="Dinheiro">Dinheiro</option>
+                                        <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                        <option value="Cartão de Débito">Cartão de Débito</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Confirmar Check-out</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Modal Adicionar Quarto -->
+            <div class="modal fade" id="addRoomModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Adicionar Novo Quarto</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addRoomForm" method="POST" action="/rooms/add">
+                                <div class="mb-3">
+                                    <label class="form-label">Nome do Quarto</label>
+                                    <input type="text" class="form-control" name="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Valor</label>
+                                    <input type="number" class="form-control" name="value" min="1" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-select" name="status" required>
+                                        <option value="Livre">Livre</option>
+                                        <option value="Ocupado">Ocupado</option>
+                                        <option value="Limpeza">Limpeza</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-custom">Adicionar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString();
+
+            // Atualiza o tempo percorrido de cada quarto
+            const rooms = document.querySelectorAll('.room-card');
+            rooms.forEach(room => {
+                const roomId = room.getAttribute('data-room-id');
+                const timeElement = document.getElementById('time_' + roomId);
+                if (timeElement) {
+                    const timeElapsed = parseFloat(timeElement.textContent); // Tempo em minutos
+                    const newTimeElapsed = (timeElapsed + 1/60).toFixed(2); // Incrementa 1 minuto a cada 60 segundos
+                    timeElement.textContent = newTimeElapsed;
+                }
+            });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>

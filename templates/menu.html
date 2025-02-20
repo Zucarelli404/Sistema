@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica Tatuapé - Menu Principal</title>
+    <!-- Importação de Fontes -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Nunito:wght@600&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 e FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* Paleta de Cores */
+        :root {
+            --primary-color: #6C63FF;
+            --secondary-color: #4C4B6B;
+            --accent-color: #F1C40F;
+            --background-light: #f4f6f9;
+            --background-dark: #2C3E50;
+            --text-light: #ecf0f1;
+            --text-dark: #2c3e50;
+        }
+
+        /* Estilização Geral */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+        body.dark-theme {
+            background-color: var(--background-dark);
+            color: var(--text-light);
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: var(--primary-color);
+            padding: 15px;
+        }
+        .navbar-brand, .nav-link {
+            color: var(--text-light) !important;
+        }
+        .nav-link:hover {
+            background-color: var(--secondary-color);
+            border-radius: 8px;
+        }
+
+        /* Botões Personalizados */
+        .btn-primary, .btn-dark-theme {
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+        .btn-primary:hover, .btn-dark-theme:hover {
+            background-color: var(--accent-color);
+        }
+
+        /* Estilização dos Cards */
+        .card {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            margin: 15px 0;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: scale(1.05);
+        }
+        .dark-theme .card {
+            background-color: rgba(44, 62, 80, 0.9);
+        }
+
+        /* Layout do Menu */
+        .menu-container {
+            padding: 30px;
+            max-width: 1100px;
+            margin: 30px auto;
+        }
+        .menu-container h1 {
+            font-size: 36px;
+            font-weight: 600;
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+        }
+
+        /* Ícones */
+        .menu-icon {
+            font-size: 22px;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Clínica Tatuapé</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <span class="nav-link">
+                            <i class="fas fa-user menu-icon"></i> Usuário: <strong>{{ session.get('role', 'Desconhecido') }}</strong>
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/profile">
+                            <i class="fas fa-id-badge menu-icon"></i> Perfil
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">
+                            <i class="fas fa-sign-out-alt menu-icon"></i> Sair
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-dark-theme" id="theme-toggle">🌙 Modo Claro</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Menu Principal -->
+    <div class="container menu-container">
+        <h1>Menu Principal</h1>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <a href="/rooms" class="btn btn-primary w-100">
+                            🛏️ Gerenciar Quartos
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <a href="/employees" class="btn btn-primary w-100">
+                            👥 Gerenciar Funcionários
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <a href="/users" class="btn btn-primary w-100">
+                            💸 Controle de Usuários
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <a href="/cashflow" class="btn btn-primary w-100">
+                            📊 Fluxo de Caixa
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <a href="/" class="btn btn-primary w-100">
+                            ⚙️ Administração Bar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <a href="/atendimentos" class="btn btn-primary w-100">
+                            📝 Atendimento
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const isDarkMode = localStorage.getItem('dark-mode') === 'true';
+
+            document.body.classList.toggle('dark-theme', isDarkMode);
+            themeToggleBtn.textContent = isDarkMode ? '☀️ Modo Claro' : '🌙 Modo Escuro';
+
+            themeToggleBtn.addEventListener('click', () => {
+                document.body.classList.toggle('dark-theme');
+                localStorage.setItem('dark-mode', document.body.classList.contains('dark-theme'));
+                themeToggleBtn.textContent = document.body.classList.contains('dark-theme') ? '☀️ Modo Claro' : '🌙 Modo Escuro';
+            });
+        });
+    </script>
+</body>
+</html>
